@@ -1,5 +1,6 @@
 import discord
 from discord import app_commands
+import asyncio
 
 import envs
 
@@ -33,6 +34,8 @@ async def sudo(interaction: discord.Interaction):
     if "sudoers" in [role.name for role in interaction.user.roles]:
         # Give the user the "sudo" role
         await interaction.user.add_roles(discord.utils.get(interaction.guild.roles, name="sudo"))
+        await asyncio.sleep(3*60)
+        await interaction.user.remove_roles(discord.utils.get(interaction.guild.roles, name="sudo"))
     else:
         # The user does not have the "sudoers" role, so do nothing
         await interaction.response.send_message("You do not have the sudoers role!")
