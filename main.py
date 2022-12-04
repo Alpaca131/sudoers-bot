@@ -38,12 +38,13 @@ async def on_ready():
         return
     with open("sudo_users.json", "r") as f:
         stored_sudo_users = json.load(f)
-        sudo_users.update(stored_sudo_users)
     async_tasks = []
     for guild_id in stored_sudo_users:
+        sudo_users[int(guild_id)] = {}
         for user_id in stored_sudo_users[guild_id]:
+            sudo_users[int(guild_id)][int(user_id)] = stored_sudo_users[guild_id][user_id]
             expiry_time = stored_sudo_users[guild_id][user_id]
-            async_tasks.append(asyncio.create_task(await_sudo_expiry(expiry_time, guild_id, user_id)))
+            async_tasks.append(asyncio.create_task(await_sudo_expiry(expiry_time, int(guild_id), int(user_id))))
     if async_tasks:
         await asyncio.wait(async_tasks)
         write_sudo_users()
