@@ -57,10 +57,10 @@ async def sudo(interaction: discord.Interaction):
     if "sudoers" in [role.name for role in interaction.user.roles]:
         # Give the user the "sudo" role
         await interaction.user.add_roles(discord.utils.get(interaction.guild.roles, name="sudo"))
+        print(f"Granted sudo for {interaction.user}")
         await interaction.response.send_message("You have been granted sudo access. Valid for 3 min.", ephemeral=True)
         add_sudo_users(interaction.guild.id, interaction.user.id)
-        await asyncio.sleep(3 * 60)
-        await interaction.user.remove_roles(discord.utils.get(interaction.guild.roles, name="sudo"))
+        await await_sudo_expiry(time.time() + 60*3, interaction.guild.id, interaction.user.id)
     else:
         # The user does not have the "sudoers" role, so do nothing
         await interaction.response.send_message("You do not have the sudoers role!")
@@ -79,7 +79,7 @@ def write_sudo_users():
         json.dump(sudo_users, f)
 
 
-async def await_sudo_expiry(expiry: int, guild_id: int, user_id: int):
+async def await_sudo_expiry(expiry: float, guild_id: int, user_id: int):
     seconds_to_wait = expiry - time.time()
     if seconds_to_wait > 0:
         await asyncio.sleep(seconds_to_wait)
@@ -87,6 +87,10 @@ async def await_sudo_expiry(expiry: int, guild_id: int, user_id: int):
     member = guild.get_member(int(user_id))
     await member.remove_roles(discord.utils.get(guild.roles, name="sudo"))
     sudo_users[guild_id].pop(user_id)
+    # If there are no more sudo users in the guild, remove the guild from the dict
+    if not sudo_users[guild_id]:
+        sudo_users.pop(guild_id)
+    write_sudo_users()
     print(f"Removed sudo from {member}")
 
 # Run the bot
