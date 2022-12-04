@@ -42,6 +42,7 @@ async def on_ready():
     for guild_id in stored_sudo_users:
         sudo_users[int(guild_id)] = {}
         for user_id in stored_sudo_users[guild_id]:
+            # put same expiry info to sudo_users
             sudo_users[int(guild_id)][int(user_id)] = stored_sudo_users[guild_id][user_id]
             expiry_time = stored_sudo_users[guild_id][user_id]
             async_tasks.append(asyncio.create_task(await_sudo_expiry(expiry_time, int(guild_id), int(user_id))))
