@@ -34,6 +34,7 @@ async def sudo(interaction: discord.Interaction):
     if "sudoers" in [role.name for role in interaction.user.roles]:
         # Give the user the "sudo" role
         await interaction.user.add_roles(discord.utils.get(interaction.guild.roles, name="sudo"))
+        await interaction.response.send_message("You have been granted sudo access. Valid for 3 min.", ephemeral=True)
         await asyncio.sleep(3*60)
         await interaction.user.remove_roles(discord.utils.get(interaction.guild.roles, name="sudo"))
     else:
