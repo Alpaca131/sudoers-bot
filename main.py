@@ -33,6 +33,10 @@ client = MyClient(intents=discord.Intents.all())
 @client.event
 async def on_ready():
     global file_loaded
+    client.change_presence(activity=discord.Activity(
+        type=discord.ActivityType.watching, 
+        name=f"{len(client.guilds)} servers"
+        ))
     print("logged in")
     if file_loaded:
         return
@@ -48,7 +52,6 @@ async def on_ready():
             async_tasks.append(asyncio.create_task(await_sudo_expiry(expiry_time, int(guild_id), int(user_id))))
     if async_tasks:
         await asyncio.wait(async_tasks)
-        write_sudo_users()
     file_loaded = True
 
 
@@ -67,6 +70,18 @@ async def sudo(interaction: discord.Interaction):
         # The user does not have the "sudoers" role, so do nothing
         await interaction.response.send_message("You do not have the sudoers role!")
 
+        
+@client.event
+async def on_guild_join(guild):
+    await client.change_presence(activity=
+                                 discord.Activity(
+                                     type=discord.ActivityType.watching, 
+                                     name=f"{len(client.guilds)} servers")
+                                )
+
+@client.event
+async def on_guild_remove(guild):
+    await client.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name=f"{len(client.guilds)} servers"))
 
 def add_sudo_users(guild_id, user_id):
     if guild_id not in sudo_users:
